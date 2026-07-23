@@ -19,9 +19,22 @@ public class Caller {
     private String logo;
     private String banner;
 
+    // Default constructor (required by JPA)
     public Caller() {
     }
 
+    // Constructor for inserting data (ADD THIS)
+    public Caller(String phoneNumber, String companyName, Boolean verified, 
+                  String callReason, String logo, String banner) {
+        this.phoneNumber = phoneNumber;
+        this.companyName = companyName;
+        this.verified = verified;
+        this.callReason = callReason;
+        this.logo = logo;
+        this.banner = banner;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
