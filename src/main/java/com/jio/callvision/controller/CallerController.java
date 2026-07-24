@@ -15,16 +15,42 @@ public class CallerController {
         this.callerService = callerService;
     }
 
-    // Existing API for Android app
+    // Existing API for Android app - FIXED
     @GetMapping("/api/incoming-call")
     public Caller getIncomingCall(@RequestParam String phone) {
-
-        Caller caller = callerService.getCallerByPhoneNumber(phone);
-
+        // Normalize the phone number by removing spaces, dashes, and plus signs
+        String normalizedPhone = phone.replaceAll("[\\s-]", "");
+        
+        // Try to find by normalized phone
+        Caller caller = callerService.getCallerByPhoneNumber(normalizedPhone);
+        
         if (caller != null) {
             return caller;
         }
-
+        
+        // Try with the original phone number (in case it has spaces)
+        if (!phone.equals(normalizedPhone)) {
+            caller = callerService.getCallerByPhoneNumber(phone);
+            if (caller != null) {
+                return caller;
+            }
+        }
+        
+        // Remove country code and try partial match
+        String phoneWithoutCountryCode = normalizedPhone.replaceFirst("^\\+91", "");
+        if (!phoneWithoutCountryCode.isEmpty() && !phoneWithoutCountryCode.equals(normalizedPhone)) {
+            List<Caller> allCallers = callerService.getAllCallers();
+            for (Caller c : allCallers) {
+                String dbPhone = c.getPhoneNumber().replaceAll("[\\s-]", "");
+                if (dbPhone.contains(phoneWithoutCountryCode) || 
+                    phoneWithoutCountryCode.contains(dbPhone.replaceFirst("^\\+91", ""))) {
+                    return c;
+                }
+            }
+        }
+        
+        // Only return random as last resort, but log it
+        System.out.println("⚠️ No caller found for: " + phone + ", returning random");
         return callerService.getRandomCaller();
     }
 
@@ -52,6 +78,7 @@ public class CallerController {
     public void deleteCaller(@PathVariable Long id) {
         callerService.deleteCaller(id);
     }
+    
     @GetMapping("/api/callers/search")
     public Caller getCallerByPhoneNumber(@RequestParam String phone) {
         return callerService.getCallerByPhoneNumber(phone);
