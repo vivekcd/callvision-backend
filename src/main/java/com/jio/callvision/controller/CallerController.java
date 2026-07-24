@@ -18,20 +18,10 @@ public class CallerController {
    @GetMapping("/api/incoming-call")
 public Caller getIncomingCall(@RequestParam String phone) {
 
-    String cleanPhone = phone.replaceAll("\\D", "");
+    System.out.println("========== INCOMING CALL API ==========");
+    System.out.println("Phone = " + phone);
 
-    List<Caller> callers = callerService.getAllCallers();
-
-    for (Caller caller : callers) {
-
-        String dbPhone = caller.getPhoneNumber().replaceAll("\\D", "");
-
-        if (dbPhone.equals(cleanPhone)) {
-            return caller;
-        }
-    }
-
-    return null;
+    throw new RuntimeException("TEST - THIS IS THE NEW CODE");
 }
 
     // Get all callers
