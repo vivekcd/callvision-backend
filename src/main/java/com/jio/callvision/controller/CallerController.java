@@ -15,7 +15,6 @@ public class CallerController {
         this.callerService = callerService;
     }
 
-    // Existing API for Android app - FIXED
     @GetMapping("/api/incoming-call")
     public Caller getIncomingCall(@RequestParam String phone) {
         // Remove ALL spaces, dashes, plus signs from incoming phone
@@ -26,6 +25,7 @@ public class CallerController {
         
         // Find exact match after cleaning both sides
         for (Caller c : allCallers) {
+            // Remove spaces, dashes, plus signs from database phone too
             String dbPhone = c.getPhoneNumber().replaceAll("[\\s-+]", "");
             if (dbPhone.equals(cleanPhone)) {
                 System.out.println("✅ Found: " + c.getCompanyName() + " for phone: " + phone);
@@ -33,9 +33,9 @@ public class CallerController {
             }
         }
         
-        // No match found
+        // No match found — return null (app will show "Unknown")
         System.out.println("⚠️ No caller found for: " + phone);
-        return null;  // Return null instead of random
+        return null;
     }
 
     // Get all callers
