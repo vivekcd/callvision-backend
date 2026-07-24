@@ -17,42 +17,24 @@ public class CallerController {
 
     // Existing API for Android app - FIXED
     @GetMapping("/api/incoming-call")
-    public Caller getIncomingCall(@RequestParam String phone) {
-        // Normalize the phone number by removing spaces, dashes, and plus signs
-        String normalizedPhone = phone.replaceAll("[\\s-]", "");
-        
-        // Try to find by normalized phone
-        Caller caller = callerService.getCallerByPhoneNumber(normalizedPhone);
-        
-        if (caller != null) {
-            return caller;
+public Caller getIncomingCall(@RequestParam String phone) {
+    // Remove all spaces, dashes, and plus signs
+    String cleanPhone = phone.replaceAll("[\\s-+]", "");
+    
+    // Get all callers and find by phone number (ignoring spaces)
+    List<Caller> allCallers = callerService.getAllCallers();
+    for (Caller c : allCallers) {
+        String dbPhone = c.getPhoneNumber().replaceAll("[\\s-+]", "");
+        if (dbPhone.equals(cleanPhone) || dbPhone.endsWith(cleanPhone) || cleanPhone.endsWith(dbPhone)) {
+            System.out.println("✅ Found: " + c.getCompanyName() + " for phone: " + phone);
+            return c;
         }
-        
-        // Try with the original phone number (in case it has spaces)
-        if (!phone.equals(normalizedPhone)) {
-            caller = callerService.getCallerByPhoneNumber(phone);
-            if (caller != null) {
-                return caller;
-            }
-        }
-        
-        // Remove country code and try partial match
-        String phoneWithoutCountryCode = normalizedPhone.replaceFirst("^\\+91", "");
-        if (!phoneWithoutCountryCode.isEmpty() && !phoneWithoutCountryCode.equals(normalizedPhone)) {
-            List<Caller> allCallers = callerService.getAllCallers();
-            for (Caller c : allCallers) {
-                String dbPhone = c.getPhoneNumber().replaceAll("[\\s-]", "");
-                if (dbPhone.contains(phoneWithoutCountryCode) || 
-                    phoneWithoutCountryCode.contains(dbPhone.replaceFirst("^\\+91", ""))) {
-                    return c;
-                }
-            }
-        }
-        
-        // Only return random as last resort, but log it
-        System.out.println("⚠️ No caller found for: " + phone + ", returning random");
-        return callerService.getRandomCaller();
     }
+    
+    // If no match found, return random
+    System.out.println("⚠️ No caller found for: " + phone + ", returning random");
+    return callerService.getRandomCaller();
+}
 
     // Get all callers
     @GetMapping("/api/callers")
