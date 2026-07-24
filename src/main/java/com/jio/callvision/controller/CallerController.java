@@ -15,27 +15,22 @@ public class CallerController {
         this.callerService = callerService;
     }
 
-    @GetMapping("/api/incoming-call")
+   @GetMapping("/api/incoming-call")
 public Caller getIncomingCall(@RequestParam String phone) {
-    System.out.println("***** NEW CONTROLLER RUNNING *****");
-    System.out.println("Incoming phone = " + phone);
 
-   String cleanPhone = phone.replaceAll("\\D", "");
-    System.out.println("Clean phone = " + cleanPhone);
+    String cleanPhone = phone.replaceAll("\\D", "");
 
-    List<Caller> allCallers = callerService.getAllCallers();
+    List<Caller> callers = callerService.getAllCallers();
 
-    for (Caller c : allCallers) {
-        String dbPhone = c.getPhoneNumber().replaceAll("\\D", "");
-        System.out.println("Comparing " + dbPhone + " with " + cleanPhone);
+    for (Caller caller : callers) {
+
+        String dbPhone = caller.getPhoneNumber().replaceAll("\\D", "");
 
         if (dbPhone.equals(cleanPhone)) {
-            System.out.println("MATCH FOUND: " + c.getCompanyName());
-            return c;
+            return caller;
         }
     }
 
-    System.out.println("NO MATCH");
     return null;
 }
 
