@@ -16,27 +16,28 @@ public class CallerController {
     }
 
     @GetMapping("/api/incoming-call")
-    public Caller getIncomingCall(@RequestParam String phone) {
-        // Remove ALL spaces, dashes, plus signs from incoming phone
-        String cleanPhone = phone.replaceAll("[\\s-+]", "");
-        
-        // Get all callers
-        List<Caller> allCallers = callerService.getAllCallers();
-        
-        // Find exact match after cleaning both sides
-        for (Caller c : allCallers) {
-            // Remove spaces, dashes, plus signs from database phone too
-            String dbPhone = c.getPhoneNumber().replaceAll("[\\s-+]", "");
-            if (dbPhone.equals(cleanPhone)) {
-                System.out.println("✅ Found: " + c.getCompanyName() + " for phone: " + phone);
-                return c;
-            }
+public Caller getIncomingCall(@RequestParam String phone) {
+    System.out.println("***** NEW CONTROLLER RUNNING *****");
+    System.out.println("Incoming phone = " + phone);
+
+   String cleanPhone = phone.replaceAll("\\D", "");
+    System.out.println("Clean phone = " + cleanPhone);
+
+    List<Caller> allCallers = callerService.getAllCallers();
+
+    for (Caller c : allCallers) {
+        String dbPhone = c.getPhoneNumber().replaceAll("\\D", "");
+        System.out.println("Comparing " + dbPhone + " with " + cleanPhone);
+
+        if (dbPhone.equals(cleanPhone)) {
+            System.out.println("MATCH FOUND: " + c.getCompanyName());
+            return c;
         }
-        
-        // No match found — return null (app will show "Unknown")
-        System.out.println("⚠️ No caller found for: " + phone);
-        return null;
     }
+
+    System.out.println("NO MATCH");
+    return null;
+}
 
     // Get all callers
     @GetMapping("/api/callers")
