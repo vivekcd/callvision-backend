@@ -15,13 +15,32 @@ public class CallerController {
         this.callerService = callerService;
     }
 
-   @GetMapping("/api/incoming-call")
+@GetMapping("/api/incoming-call")
 public Caller getIncomingCall(@RequestParam String phone) {
 
     System.out.println("========== INCOMING CALL API ==========");
     System.out.println("Phone = " + phone);
 
-    throw new RuntimeException("TEST - THIS IS THE NEW CODE");
+    String cleanPhone = phone.replaceAll("\\D", "");
+
+    List<Caller> callers = callerService.getAllCallers();
+
+    System.out.println("Total callers in DB = " + callers.size());
+
+    for (Caller caller : callers) {
+
+        String dbPhone = caller.getPhoneNumber().replaceAll("\\D", "");
+
+        System.out.println("Checking DB phone = " + dbPhone);
+
+        if (dbPhone.equals(cleanPhone)) {
+            System.out.println("MATCH FOUND!");
+            return caller;
+        }
+    }
+
+    System.out.println("NO MATCH FOUND");
+    return null;
 }
 
     // Get all callers
