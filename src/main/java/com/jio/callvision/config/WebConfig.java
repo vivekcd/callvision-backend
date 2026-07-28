@@ -21,10 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve static files from classpath:/static/
         registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/")
-                .setCachePeriod(3600);
+                .addResourceLocations("classpath:/static/");
     }
 
     // ✅ This maps "/" to index.html
