@@ -18,22 +18,28 @@ public class Caller {
     private Boolean verified;
     private String logo;
     private String banner;
-    private String videoRingback;  // ✅ ADD THIS
+    private String videoRingback;
 
     // Default constructor (required by JPA)
     public Caller() {
     }
 
-    // Constructor for inserting data
+    // Constructor with videoRingback (7 parameters)
     public Caller(String phoneNumber, String companyName, Boolean verified, 
-                  String callReason, String logo, String banner, String videoRingback) {  // ✅ ADD videoRingback
+                  String callReason, String logo, String banner, String videoRingback) {
         this.phoneNumber = phoneNumber;
         this.companyName = companyName;
         this.verified = verified;
         this.callReason = callReason;
         this.logo = logo;
         this.banner = banner;
-        this.videoRingback = videoRingback;  // ✅ ADD THIS
+        this.videoRingback = videoRingback;
+    }
+
+    // ✅ NEW: Constructor without videoRingback (6 parameters)
+    public Caller(String phoneNumber, String companyName, Boolean verified, 
+                  String callReason, String logo, String banner) {
+        this(phoneNumber, companyName, verified, callReason, logo, banner, null);
     }
 
     // Getters and Setters
@@ -93,7 +99,6 @@ public class Caller {
         this.banner = banner;
     }
 
-    // ✅ ADD GETTER AND SETTER FOR videoRingback
     public String getVideoRingback() {
         return videoRingback;
     }
