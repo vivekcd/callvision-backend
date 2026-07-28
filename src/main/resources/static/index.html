@@ -2,37 +2,39 @@
 <html>
 <head>
     <title>CallVision Admin</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container mt-4">
 
 <h2>CallVision Admin</h2>
+
+<!-- WebSocket Status -->
+<div class="mb-3">
+    <span>WebSocket Status: </span>
+    <span id="wsStatus" style="font-weight: bold; color: orange;">Connecting...</span>
+</div>
+<div id="wsMessages" class="mb-3"></div>
+
 <hr>
 
 <div class="row mb-3">
-
     <div class="col">
         <input id="companyName" class="form-control" placeholder="Company Name">
     </div>
-
     <div class="col">
         <input id="phoneNumber" class="form-control" placeholder="Phone Number">
     </div>
-
     <div class="col">
         <input id="callReason" class="form-control" placeholder="Reason">
     </div>
-
     <div class="col">
         <input type="checkbox" id="verified"> Verified
     </div>
-
     <div class="col">
         <button class="btn btn-primary" onclick="saveCaller()">Save</button>
     </div>
-
 </div>
+
 <table class="table table-bordered" id="callerTable">
     <thead>
     <tr>
@@ -41,23 +43,50 @@
         <th>Phone</th>
         <th>Reason</th>
         <th>Verified</th>
+        <th>Actions</th>
     </tr>
     </thead>
-
     <tbody></tbody>
-
 </table>
 
 <script>
+// ============ WEBSOCKET CLIENT ============
+const wsUrl = `wss://${window.location.host}/ws/incoming-call`;
+const ws = new WebSocket(wsUrl);
 
+ws.onopen = () => {
+    console.log('✅ WebSocket connected to CallVision backend');
+    document.getElementById('wsStatus').textContent = '✅ Connected';
+    document.getElementById('wsStatus').style.color = 'green';
+};
+
+ws.onmessage = (event) => {
+    console.log('📨 WebSocket message:', event.data);
+    const msgDiv = document.getElementById('wsMessages');
+    if (msgDiv) {
+        msgDiv.innerHTML += `<div>📨 ${event.data}</div>`;
+    }
+};
+
+ws.onerror = (error) => {
+    console.error('❌ WebSocket error:', error);
+    document.getElementById('wsStatus').textContent = '❌ Error';
+    document.getElementById('wsStatus').style.color = 'red';
+};
+
+ws.onclose = () => {
+    console.log('🔌 WebSocket disconnected');
+    document.getElementById('wsStatus').textContent = '🔌 Disconnected';
+    document.getElementById('wsStatus').style.color = 'orange';
+};
+// ===========================================
+
+// Existing API calls...
 fetch('/api/callers')
 .then(r=>r.json())
 .then(data=>{
-
     let body=document.querySelector("#callerTable tbody");
-
     data.forEach(c=>{
-
         body.innerHTML += `
 <tr>
     <td>${c.id}</td>
@@ -66,31 +95,27 @@ fetch('/api/callers')
     <td>${c.callReason}</td>
     <td>${c.verified}</td>
     <td>
-<td>
-    <button class="btn btn-warning btn-sm"
+        <button class="btn btn-warning btn-sm"
             onclick="editCaller(${c.id},
             '${c.companyName}',
             '${c.phoneNumber}',
             '${c.callReason}',
             ${c.verified})">
-        Edit
-    </button>
-
-    <button class="btn btn-danger btn-sm"
+            Edit
+        </button>
+        <button class="btn btn-danger btn-sm"
             onclick="deleteCaller(${c.id})">
-        Delete
-    </button>
-</td>
+            Delete
+        </button>
     </td>
 </tr>
 `;
-
     });
-
 });
-let editId = null;
-function saveCaller() {
 
+let editId = null;
+
+function saveCaller() {
     const caller = {
         companyName: document.getElementById("companyName").value,
         phoneNumber: document.getElementById("phoneNumber").value,
@@ -101,48 +126,35 @@ function saveCaller() {
     };
 
     if (editId == null) {
-
         fetch('/api/callers', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(caller)
         })
         .then(() => location.reload());
-
     } else {
-
         fetch('/api/callers/' + editId, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(caller)
         })
         .then(() => location.reload());
-
     }
-
 }
 
 function deleteCaller(id) {
-
     fetch('/api/callers/' + id, {
         method: 'DELETE'
     })
     .then(() => location.reload());
-
 }
+
 function editCaller(id, company, phone, reason, verified) {
-
     editId = id;
-
     document.getElementById("companyName").value = company;
     document.getElementById("phoneNumber").value = phone;
     document.getElementById("callReason").value = reason;
     document.getElementById("verified").checked = verified;
-
 }
 </script>
 
