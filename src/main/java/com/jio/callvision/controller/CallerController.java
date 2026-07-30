@@ -72,4 +72,22 @@ public Caller getIncomingCall(@RequestParam String phone) {
     public Caller getCallerByPhoneNumber(@RequestParam String phone) {
         return callerService.getCallerByPhoneNumber(phone);
     }
+
+    @GetMapping("/api/callers/by-phone/{phone}")
+public Caller getCallerByPhone(@PathVariable String phone) {
+
+    String cleanPhone = phone.replaceAll("\\D", "");
+
+    List<Caller> callers = callerService.getAllCallers();
+
+    for (Caller caller : callers) {
+        String dbPhone = caller.getPhoneNumber().replaceAll("\\D", "");
+
+        if (dbPhone.equals(cleanPhone)) {
+            return caller;
+        }
+    }
+
+    return null;
+}
 }
